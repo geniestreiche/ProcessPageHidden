@@ -53,7 +53,7 @@ class ProcessPageHidden extends Process {
 
 	public function hookPageListActions(HookEvent $event) {
 	    $page = $event->arguments[0]; 	
-		//$actions = $event->return; 
+
 	    if($page->editable()) {
 		    $actions = $event->return;
 		    
