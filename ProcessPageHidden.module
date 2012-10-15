@@ -11,11 +11,12 @@ class ProcessPageHidden extends Process {
 	
 	public static function getModuleInfo() {
 		return array(
-			'title' => 'Page Hidden', 
-			'version' => '100', 
-			'summary' => 'Adds a "hidden" link to the page list.',
+			'title' => __('Page Hide/Unhide', __FILE__),
+			'summary' => __('Adds a "hidden" link to the page list.', __FILE__),
+			'version' => '100',
+			'permanent' => false,
 			'permission' => 'page-hidden',
-			'autoload' => true 
+			'autoload' => true
 		);
 	}
 
@@ -53,8 +54,8 @@ class ProcessPageHidden extends Process {
 	
 	public function ___execute() {
 		$page = $this->pages->get((int) $this->input->get->id);
-		if(!$this->hasPermission($this->page)) throw new WirePermissionException("$error C");
-		
+		if (!$this->hasPermission($page)) throw new WirePermissionException("You are unable to hide/unhide this page!");
+				
 		if (!$page->is(Page::statusHidden)) {
 			$page->addStatus(Page::statusHidden);
 		} else {
@@ -63,21 +64,16 @@ class ProcessPageHidden extends Process {
 
 		$page->save();
 
-    	$this->session->redirect("../?open={$page}");
-    }
+		$this->session->redirect("../?open={$page}");
+	}
 
     public function hasPermission(Page $page) {
 		$user = $this->user; 
 
 		if($page->is(Page::statusSystem) || $page->is(Page::statusSystemID)) return false; 
-		if($page->parent->template->noChildren) return false; 
-		if($page->template->noParents) return false; 
-
-		if(count($page->parent->template->childTemplates) && !in_array($page->template->id, $page->parent->template->childTemplates)) return false; 
-		if(count($page->template->parentTemplates) && !in_array($page->parent->template->id, $page->template->parentTemplates)) return false; 
-
+		
 		if($user->isSuperuser()) return true; 
-		if($user->hasPermission('page-create', $page) && $user->hasPermission('page-hidden', $page)) return true; 
+		if($user->hasPermission('page-hidden', $page)) return true;
 
 		return false; 
 	}
